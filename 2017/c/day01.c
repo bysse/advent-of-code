@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "io-util.h"
 
 void partA(INPUT *input) {
