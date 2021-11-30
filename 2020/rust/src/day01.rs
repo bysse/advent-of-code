@@ -14,7 +14,7 @@ pub fn run() {
             }
             if a + b == 2020 {
                 println!("A: {}", a * b);
-                break 'outerA
+                break 'outerA;
             }
         }
     }
@@ -25,9 +25,9 @@ pub fn run() {
                 if a + b + c > 2020 {
                     break;
                 }
-                if a + b + c== 2020 {
+                if a + b + c == 2020 {
                     println!("B: {}", a * b * c);
-                    break 'outerB
+                    break 'outerB;
                 }
             }
         }
