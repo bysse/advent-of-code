@@ -2,6 +2,15 @@ import os
 import re
 from functools import reduce
 from itertools import chain
+
+def groups(filename, fn=None):
+    """Iterator for blank line separated groups in a file without starting or trailing whitespace"""
+    if not fn:
+        fn = lambda x: x
+    with open(filename, 'r') as fd:
+        for group in fd.read().split("\n\n"):
+            if group:
+                yield [fn(x.strip()) for x in group.split("\n")]
  
 def lines(filename):
     """Iterator for lines in a file without starting or trailing whitespace"""
