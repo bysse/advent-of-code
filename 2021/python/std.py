@@ -197,3 +197,31 @@ class Map(dict):
     def __delitem__(self, key):
         super(Map, self).__delitem__(key)
         del self.__dict__[key]
+
+
+def summary(filename):    
+    from statistics import mean, median
+    data = list(lines(filename))
+    print("Filename:    ", filename)
+    print("Line count:  ", len(data))
+    print("Empty lines: ", len(list(filter(lambda x: not x, data))))
+
+    cols = []
+    for line in data:
+        cols.append(len(re.split(r'[ ,]+', line)))
+    
+    print("Columns:")
+    print("  Average:    {:.1f}".format(mean(cols)))
+    print("  Median:     {:.1f}".format(median(cols)))
+    print("  Min:        {}".format(min(cols)))
+    print("  Max:        {}".format(max(cols)))
+
+    print()
+    if len(data) < 10:
+        print("First 100 bytes:")
+        print(data[0][:100])
+    else:
+        print("First 10 lines:")
+        print("\n".join(data[:10]))
+
+    

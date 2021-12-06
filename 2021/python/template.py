@@ -3,13 +3,15 @@ import re
 import functools
 import itertools
 
-INPUT = "../input/input.txt"
+DAY = "04"
+INPUT = "../input/input{}.txt".format(DAY)
 #INPUT = "../input/test.txt"
 
+data = []
 for line in lines(INPUT):
-    entries = ints(line)
+    data.append( ints(line) )
 
-
+summary(INPUT)
 
 
 print("A:")
