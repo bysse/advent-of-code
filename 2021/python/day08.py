@@ -8,14 +8,13 @@ DAY = "08"
 INPUT = "../input/test.txt"
 
 display = ['abcefg', 'cf', 'acdeg', 'acdfg', 'bcdf', 'abdfg', 'abdefg', 'acf', 'abcdefg', 'abcdfg']
-linemap = [0]*10
-for x in "abcdefg":
-    for i, n in enumerate(display):
+
+# which lines are active in a digit
+digitmap = [set() for x in range(10)]
+for line, x in enumerate("abcdefg"):
+    for digit, n in enumerate(display):
         if x in n:
-            S = linemap.get(x, set())
-            S.add(i)
-            linemap[x] = S
-print(linemap)
+            digitmap[digit].add(x)
 
 data = []
 for line in lines(INPUT):    
@@ -40,7 +39,9 @@ print("A:", sum(list(count.values())))
 def analyse(seq):
     mapping = [set() for x in range(10)]
     for digit in seq:
-        if len(digit) == 2:
+        if len(digit) == 2:            
+            # take the lines for that digit and add the potential mappings to it
+
             mapping[1] = digit
         elif len(digit) == 4:
             mapping[4] = digit
