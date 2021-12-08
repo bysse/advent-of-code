@@ -24,4 +24,3 @@ k = mean(data)
 fuel = sum([cost(abs(x-k)) for x in data])
 print("B:", int(fuel))
 
-
