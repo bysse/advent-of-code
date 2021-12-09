@@ -110,6 +110,19 @@ def iterate2D(data):
         for x in range(len(row)):
             yield x, y, row[x]
 
+def tdlr2D(x, y, width, height, includeCenter=False):
+    """ Iterator for top, down, left, right adjacent coordinates within the specified rect"""
+    for dy in [-1, 1]:
+        if y + dy < 0 or y + dy >= height:
+            continue
+        yield (x, y+dy)
+    
+    for dx in [-1, 1]:
+        if x + dx < 0 or x + dx >= width:
+            continue
+        yield (x+dx, y)
+    if includeCenter:
+        yield (x, y)
 
 def adjacent2D(x, y, width, height, includeCenter=False):
     """ Iterator for all adjacent coordinates within the specified rect"""
@@ -215,6 +228,7 @@ def summary(filename):
     print("  Median:     {:.1f}".format(median(cols)))
     print("  Min:        {}".format(min(cols)))
     print("  Max:        {}".format(max(cols)))
+    print("  Length:     {}".format(mean([len(x) for x in data])))
 
     print()
     if len(data) < 10:
