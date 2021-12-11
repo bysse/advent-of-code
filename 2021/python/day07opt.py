@@ -3,7 +3,6 @@ from statistics import mean, median
 
 DAY = "07"
 INPUT = "../input/input{}.txt".format(DAY)
-#INPUT = "../input/test.txt"
 
 for line in lines(INPUT):
     data = ints(line)
@@ -23,4 +22,3 @@ def cost(n):
 k = mean(data)
 fuel = sum([cost(abs(x-k)) for x in data])
 print("B:", int(fuel))
-
