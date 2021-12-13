@@ -28,6 +28,8 @@ def extract(string, patterns, optional=False):
     """Returns the matching strings for a list of regex expressions sequentially over a string"""
     offset = 0
     result = []
+    if type(patterns) != list:
+        patterns = [patterns]
     for pattern in patterns:
         m = re.search(pattern, string[offset:])
         if not m:
