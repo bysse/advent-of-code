@@ -12,6 +12,14 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "cwd": "${fileDirname}"
-        }
+        },
+        {
+            "name": "Connect to external session",
+            "type": "go",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}"
+        }        
     ]
 }
