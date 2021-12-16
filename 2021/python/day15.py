@@ -1,3 +1,4 @@
+from math import sqrt
 from std import *
 from sortedcontainers import SortedSet
 import re
@@ -39,7 +40,7 @@ def search():
                 continue
 
             visited[(nx, ny)] = ncost
-            frontier.add( (nx, ny, cost + field[ny][nx]) )
+            frontier.add( (nx, ny, ncost) )
 
 print("A:", search())
 
