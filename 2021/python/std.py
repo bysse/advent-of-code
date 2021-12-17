@@ -21,7 +21,7 @@ def lines(filename):
 
 def ints(string):
     """Returns a list of all integers in the string"""
-    return list(map(int, re.findall("[0-9]+", string)))
+    return list(map(int, re.findall("-?[0-9]+", string)))
 
 
 def extract(string, patterns, optional=False):
