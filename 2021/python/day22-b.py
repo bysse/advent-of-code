@@ -17,21 +17,28 @@ def intersect(a, b):
     return (max(ax0, bx0), min(ax1, bx1), max(ay0, by0), min(ay1, by1), max(az0, bz0), min(az1, bz1))
 
 def is_valid(a):
-    return a[0] < a[1] and a[2] < a[3] and a[4] < a[5]
+    return a[0] <= a[1] and a[2] <= a[3] and a[4] <= a[5]
 
 def volume(a):    
-    return (a[1]-a[0]+1)*(a[3]-a[2]+1)*(a[5]-a[4]+1)
+    return (a[1]-a[0]+1) * (a[3]-a[2]+1) * (a[5]-a[4]+1)
 
 cubes = Counter()
 for sign, cube in data:
     add = Counter()
+
     for ec, s in cubes.items():
         ic = intersect(ec, cube)
         if is_valid(ic):
             add[ic] -= s
+
     if sign > 0:
         cubes[cube] += sign
     cubes.update(add)
+
+    # reduce the set of cubes
+    for ec in list(cubes.keys()):
+        if cubes[ec] == 0:
+            del cubes[ec]
 
 s = 0
 for cube, v in cubes.items():
