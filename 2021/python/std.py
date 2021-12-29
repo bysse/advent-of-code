@@ -16,7 +16,7 @@ def lines(filename):
     """Iterator for lines in a file without starting or trailing whitespace"""
     with open(filename, 'r') as fd:
         for line in fd:
-            yield line.strip()
+            yield line.rstrip()
    
 
 def ints(string):
@@ -137,6 +137,15 @@ def adjacent2D(x, y, width, height, includeCenter=False):
             if x + dx < 0 or x + dx >= width:
                 continue
             yield (x+dx, y+dy)
+
+def dump2D(data):
+    height = len(data)
+    width = max([len(row) for row in data])
+    for y in range(height):
+        line = data[y]
+        for x in range(len(line)):
+            print(line[x], end='')
+        print()
 
 def display2D(data, colors=None, output="data.png", scale=3, load=True, enable=True):
     if not enable:
