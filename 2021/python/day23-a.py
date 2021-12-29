@@ -1,5 +1,6 @@
 from std import *
-from sortedcontainers import SortedList
+import heapq
+import json
 import re
 import collections
 import functools
@@ -8,7 +9,7 @@ import copy
 
 DAY = "23"
 INPUT = "../input/input{}.txt".format(DAY)
-INPUT = "../input/test.txt"
+#INPUT = "../input/test.txt"
 
 cost_map= {'A': 1, 'B': 10, 'C': 100, 'D': 1000}
 rooms = {'A':[(3,3), (3,2)], 'B': [(5,3), (5,2)], 'C': [(7,3), (7,2)], 'D': [(9,3),(9,2)] }
@@ -52,6 +53,42 @@ for node, adjacent in edge.items():
             for ad in adjacent.keys():
                 if ad != nn:
                     edge[nn][ad] = 2
+for n in invalid:
+    nodes.remove(n)
+
+def find_path(p0, p1):
+    cost_map = {}
+    path_map = {}
+    frontier = [] 
+    
+    heapq.heappush(frontier, (0, p0))
+    cost_map[p0] = 0
+    path_map[p0] = []
+
+    while frontier:
+        c0, p0 = heapq.heappop(frontier)
+        path0 = path_map[p0]
+
+        for an, ac in edge[p0].items():
+            if an in cost_map and cost_map[an] <= c0 + ac:
+                continue
+
+            cost_map[an] = c0 + ac
+            path_map[an] = path0 + [an]
+
+            if p0 == p1:
+                break
+            heapq.heappush(frontier, (c0 + ac, an))
+
+    return cost_map[p1], path_map.get(p1, None)
+        
+
+paths = {}
+for n0 in nodes:
+    for n1 in nodes:
+        if n0 == n1:
+            continue
+        paths[(n0, n1)] = find_path(n0, n1)
 
 def end_state(state):
     for t, ps in rooms.items():
@@ -69,23 +106,13 @@ def show(state):
 def get_cost(t):
     return cost_map[t.upper()]
 
-def valid_move(state, p0, p1):
-    # check if something could move from p0 to p1
-    visited = set()
-    frontier = set()
-    frontier.add((p0, 0))
 
-    while frontier:
-        p0, c0 = frontier.pop()
-        if p0 == p1:
-            return c0
-
-        for adjacent, cost in edge[p0].items():
-            if adjacent in visited or adjacent in state:
-                continue
-            visited.add(adjacent)
-            frontier.add((adjacent, c0 + cost))
-    return -1
+def valid_move(state, p0, p1):    
+    cost, nodes = paths[(p0, p1)]
+    for node in nodes:
+        if node in state:
+            return -1
+    return cost
 
 def get_moves(state):
     moves = []
@@ -99,57 +126,69 @@ def get_moves(state):
                 if end[1] != 1:
                     continue
                 cost = valid_move(state, pos, end)
-                if cost > 0:
+                if cost > 0 and cost < 9:
                     moves.append((brick, pos, end, cost * get_cost(brick)))
         else:
             # move in
-            for end in rooms[brick]: # destination rooms
-                cost = valid_move(state, pos, end)
-                if cost > 0:
-                    moves.append((brick, pos, end, cost * get_cost(brick)))
+            skip = False
+            for end in rooms[brick]:
+                if end in state and state[end][0] != brick:
+                    skip = True
                     break
+            if not skip:
+                for end in rooms[brick]: # destination rooms
+                    cost = valid_move(state, pos, end)
+                    if cost > 0 :
+                        moves.append((brick, pos, end, cost * get_cost(brick)))
+                        break
     return moves
 
-def commit(move, state, energy, trail):
+def commit(move, state, energy):
     t, p0, p1, cost = move
 
     S2 = dict(state)
     S2[p1] = (t, state[p0][1] + 1)
     del S2[p0]
 
-    return energy + cost, S2, trail# + [state]
+    return energy + cost, S2
             
 def solve_a(state):           
-    queue = [ (0, state, []) ]
+    queue = set()
+    energy = {}
+
+    def insert(state, e):
+        id = repr(sorted(state.items()))
+        queue.add(id)
+        e = min(e, energy[id][0]) if id in energy else e
+        energy[id] = (e, state)
+
+    insert(state, 0)
 
     i = 0
     min_E = -1
+    discarded = 0
 
     while queue:
         i += 1
-        if i % 10000 == 0:
-            print("Iteration:",i, len(queue), min_E)
-            show(S)
+        if i % 100000 == 0:
+            print("Iteration:",i, len(queue), min_E, discarded)
 
-        E, S, trail = queue.pop()
+        id = queue.pop()
+        E, S = energy[id]
+        del energy[id]
         if min_E > 0 and E > min_E:
+            discarded += 1
             continue
 
-        #show(S)
-
-        if end_state(S):
-            if min_E < 0 or E < min_E:
-                min_E = E
-                print("Min =", E)
-            
         for move in get_moves(S):
-            queue.append( commit(move, S, E, trail) )
-
-        if i % 250 == 0:
-            queue.sort(key=lambda x: x[0], reverse=True)
-    
+            E2, S2 = commit(move, S, E)            
+            if end_state(S2):
+                if min_E < 0 or E2 < min_E:
+                    min_E = E2
+                    print("Min =", E2)
+            else:
+                insert(S2, E2)
+        
     return min_E
 
 print("A:", solve_a(state))
-#print(end_state(state))
-#print("B:")
