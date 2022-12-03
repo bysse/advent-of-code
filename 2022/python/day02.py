@@ -23,7 +23,6 @@ for line in lines(INPUT):
     enemy = ord(line[0]) - ord('A')
     me    = ord(line[2]) - ord('X')
     A += score(enemy, me)
-
     B += score(enemy, outcome[enemy].index(me*3))
 
 
