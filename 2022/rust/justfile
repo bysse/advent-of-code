@@ -1,0 +1,7 @@
+new day:
+    cargo generate . \
+        --path template \
+        --init \
+        --name whatever \
+        --define year=22 \
+        --define day={{day}}

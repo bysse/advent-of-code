@@ -1,4 +1,5 @@
 from std import *
+import copy
 import re
 import functools
 import itertools
