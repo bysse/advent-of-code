@@ -2,7 +2,7 @@ from std import *
 
 DAY = "08"
 INPUT = "../input/input{}.txt".format(DAY)
-INPUT = "../input/test.txt"
+#INPUT = "../input/test.txt"
 
 field = []
 for line in lines(INPUT):
@@ -41,12 +41,16 @@ def view(x, y, dx, dy):
     size = len(field)
     count = 0
 
+    x += dx
+    y += dy
+
     while 0 <= x < size and 0 <= y < size:
+        count += 1
         if field[y][x] >= height:
             break
-        count += 1
         x += dx
         y += dy
+
     return count
 
 
