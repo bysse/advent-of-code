@@ -6,7 +6,7 @@ import itertools
 
 DAY = "10"
 INPUT = "../input/input{}.txt".format(DAY)
-INPUT = "../input/test.txt"
+#INPUT = "../input/test.txt"
 
 operations = []
 for line in lines(INPUT):
@@ -15,29 +15,50 @@ for line in lines(INPUT):
 
 def simulate(ops, cb):
     x = 1
-    ic = 0
-    i = 0
+    ic = 1
+    score = 0
     for op in ops:
-        print(i, ic, op)
-        i += 1
-        ic += 1
         if op[0] == 'noop':
-            cb(ic, x, op)
-        if op[0] == 'addx':
-            cb(ic, x, op)
+            score += cb(ic, x, op)
             ic += 1
-            cb(ic+1, x, op)
+        if op[0] == 'addx':
+            score += cb(ic, x, op)
+            ic += 1
+            score += cb(ic, x, op)
+            ic += 1
             x += int(op[1])
-    return x
+    return score
 
 
 def signal(ic, x, op):
-    if (ic - 20) % 40 == 0:
-        print(ic, x, op)
+    if ic > 10 and (ic - 20) % 40 == 0:
+        return ic * x
+    return 0
 
 
-a = simulate(operations, signal)
-print(a)
+A = simulate(operations, signal)
+print("A:", A)
 
-print("A:")
+# ------------------------------------------
+crt = []
+
+
+def draw(ic, sprite_x, op):
+    x = (ic-1) % 40
+    if abs(sprite_x-x) <= 1:
+        crt.append('#')
+    else:
+        crt.append('.')
+    return 0
+
+simulate(operations, draw)
+
 print("B:")
+i = 0
+for y in range(6):
+    for x in range(40):
+        print(crt[i], end='')
+        i += 1
+    print()
+
+
