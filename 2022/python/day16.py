@@ -1,88 +1,114 @@
-from std import *
 import copy
-import re
-import functools
 import itertools
 
+from std import *
+
 DAY = "16"
-INPUT = "../input/input{}.txt".format(DAY)
-INPUT = "../input/test.txt"
+INPUT = f"../input/input{DAY}.txt"
+#INPUT = f"../input/test.txt"
 
 data = {}
+edge_map = {}
+rate_map = {}
+
 for line in lines(INPUT):
     part = line.split(" ")
     rate = ints(part[4])[0]
     tunnels = "".join(part[9:]).split(",")
+    rate_map[part[1]] = rate
+    edge_map[part[1]] = {t: 1 for t in tunnels}
     data[part[1]] = (rate, tunnels)
 
+# optimize the chart to remove nodes with 0 rate
+for node in data.keys():
+    if node == 'AA' or rate_map[node] > 0:
+        continue
 
-def open_valve(way, rate):
-    node, time, psi, valves, visited = way
-    time += 1
-    psi += rate * (30 - time)
+    edges = list(edge_map[node].keys())
+    for start in edges:
+        if start not in edge_map:
+            continue
+        for end in edges:
+            if end == start or end not in edge_map or node not in edge_map[end]:
+                continue
+            cost = max(edge_map[start][node], edge_map[end][node])
+            edge_map[start][end] = cost + 1
+            edge_map[end][start] = cost + 1
 
-    valves = copy.copy(valves)
-    valves.add(node)
-
-    return node, time, psi, valves, visited
-
-
-def travel(way, tunnel):
-    node, time, psi, valves, visited = way
-    time += 1
-
-    visited = copy.copy(visited)
-    #visited.add(tunnel)
-
-    return tunnel, time, psi, valves, visited
-
-
-def append(list, entry):
-    if entry not in list:
-        list.append(entry)
+        del edge_map[start][node]
+    del rate_map[node]
+    del edge_map[node]
 
 
-def search():
-    entry = 'AA'
+def shortest_path(node):
+    not_visited = set(edge_map.keys())
+    cost_map = {node: 0}
+    explore = set()
+    path_map = {node: []}
 
-    ways = [('AA', 0, 0, {'AA'}, {'AA'})]
-    while ways:
-        print(len(ways))
-        explore = []
-        for way in ways:
-            node, time, psi, valves, visited = way
-            if time >= 30 or len(valves) >= len(data):
-                yield way
+    while not_visited:
+        cost = cost_map[node]
+        for n, c in edge_map[node].items():
+            if n not in not_visited:
+                continue
+            if n not in cost_map or cost_map[n] > cost + c:
+                cost_map[n] = cost + c
+                path_map[n] = copy.deepcopy(path_map[node]) + [n]
+            explore.add(n)
 
-            rate, tunnels = data[node]
-            action = False
-            if rate > 0 and node not in valves:
-                append(explore, open_valve(way, rate))
-                action = True
+        not_visited.remove(node)
 
-            available = 0
-            for t in tunnels:
-                if t not in visited:
-                    available += 1
-            if available == 1:
-                visited.add(node)
+        if not explore:
+            break
 
-            for tunnel in tunnels:
-                if tunnel in visited:
-                    continue
-                append(explore, travel(way, tunnel))
-                action = True
+        node = sorted(explore, key=lambda x: cost_map[x])[0]
+        explore.remove(node)
 
-            if not action:
-                yield way
+    return cost_map, path_map
 
-        ways = explore
 
-best = 0
-best_solution = None
+path_cost = {}
+path_step = {}
+for node in edge_map.keys():
+    cost, path = shortest_path(node)
+    path_cost[node] = cost
+    path_step[node] = path
 
-for solution in search():
-    if solution[2] > best:
-        best = solution[2]
-        best_solution = solution
-        print("BEST", solution)
+
+def find_next_a(node, time, score, closed, max_time=30):
+    best = score
+    closed.remove(node)
+
+    for n in closed:
+        # move to node and open it
+        n_time = time + path_cost[node][n] + 1
+        if n_time > max_time:
+            continue
+        n_score = score + rate_map[n] * (max_time - n_time)
+
+        branch = find_next_a(n, n_time, n_score, copy.copy(closed), max_time)
+        if branch > best:
+            best = branch
+
+    return best
+
+
+nodes = set(list(edge_map.keys()))
+score_a = find_next_a('AA', 0, 0, nodes)
+print("A:", score_a)
+
+node_list = list(edge_map.keys())
+node_list.remove('AA')
+set_a_count = int(len(node_list) / 2)
+score_b = 0
+for nodes in itertools.combinations(node_list, set_a_count):
+    node_set_a = set(nodes)
+    node_set_b = set([x for x in node_list if x not in node_set_a])
+    node_set_a.add('AA')
+    node_set_b.add('AA')
+
+    score = find_next_a('AA', 0, 0, node_set_a, 26) + find_next_a('AA', 0, 0, node_set_b, 26)
+    if score > score_b:
+        score_b = score
+
+print("B:", score_b)

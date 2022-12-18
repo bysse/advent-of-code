@@ -5,7 +5,7 @@ import functools
 import itertools
 
 DAY = "04"
-INPUT = "../input/input{}.txt".format(DAY)
+INPUT = f"../input/input{DAY}.txt"
 # INPUT = "../input/test.txt"
 
 data = []
