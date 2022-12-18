@@ -159,6 +159,16 @@ def adjacent_2d(x, y, width, height, include_center=False):
             yield x + dx, y + dy
 
 
+def adjacent_3d(x, y, z):
+    """ Iterator for all adjacent coordinates within the specified rect"""
+    yield x + 0, y + 0, z + 1
+    yield x + 0, y + 0, z - 1
+    yield x + 0, y + 1, z + 0
+    yield x + 0, y - 1, z + 0
+    yield x + 1, y + 0, z + 0
+    yield x - 1, y + 0, z + 0
+
+
 def dump_2d(data):
     height = len(data)
     width = max([len(row) for row in data])
