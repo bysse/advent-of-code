@@ -42,16 +42,17 @@ def test_shape(shape, x, y):
 def sim(shape, x, y, t):
     while True:
         dx = -1 if flow[t % len(flow)] == '<' else 1
-        print(f"Wind({t}): dx={dx}")
+        #print(f"Wind({t}): dx={dx}")
         t += 1
         if test_shape(shape, x + dx, y):
             x += dx
-            print(f"Move: x + dx = {x}")
+            #print(f"Move: x + dx = {x}")
 
         if not test_shape(shape, x, y + 1):
             return x, y, t
-        print(f"Down: y = {y+1}")
+        #print(f"Down: y = {y+1}")
         y += 1
+
 
 time = 0
 for round in range(2022):

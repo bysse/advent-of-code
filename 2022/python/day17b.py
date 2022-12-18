@@ -17,7 +17,7 @@ for line in lines(INPUT):
     flow = line
 
 rock_height = 0
-field_height = 500
+field_height = 100
 insert = field_height - 3
 
 field = [["." for _ in range(7)] for _ in range(field_height)]
@@ -116,13 +116,13 @@ offset = repeat[0][0]
 cycle = repeat[1][0] - repeat[0][0]
 change = repeat[1][1] - repeat[0][1]
 
-print(f"CYCLE:  {offset} + n*{cycle}")
-print(f"HEIGHT: {repeat[0][1]} + n*{change}")
+#print(f"CYCLE:  {offset} + n*{cycle}")
+#print(f"HEIGHT: {repeat[0][1]} + n*{change}")
 
 n = int((target - offset - 1)/cycle)
 overflow = (target - offset - 1) % cycle
-print(f"N = {n} + {overflow}")
-print(f"height@{overflow} = {height_list[overflow]}")
+#print(f"N = {n} + {overflow}")
+#print(f"height@{overflow} = {height_list[overflow]}")
 
 
 print("B:", repeat[0][1] + n * change + height_list[overflow])
