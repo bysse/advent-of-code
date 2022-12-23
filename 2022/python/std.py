@@ -158,7 +158,6 @@ def adjacent_2d(x, y, width, height, include_center=False):
                 continue
             yield x + dx, y + dy
 
-
 def adjacent_3d(x, y, z):
     """ Iterator for all adjacent coordinates within the specified rect"""
     yield x + 0, y + 0, z + 1
@@ -281,3 +280,54 @@ def summary(filename):
     else:
         print("First 10 lines:")
         print("\n".join(data[:10]))
+
+
+class Vec3:
+    x: float
+    y: float
+    z: float
+
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __repr__(self):
+        return f"Vec3({self.x},{self.y},{self.z})"
+
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return self.x == other.x and self.y == other.y and self.z == other.z
+        return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __add__(self, other):
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __neg__(self):
+        return Vec3(-self.x, -self.y, -self.z)
+
+    def __sub__(self, other):
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, other):
+        if type(self) is type(other):
+            return self.x * other.x + self.y * other.y + self.z * other.z
+        return Vec3(self.x * other, self.y * other, self.z * other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __abs__(self):
+        return (self * self) ** 0.5
+
+    def __matmul__(self, other):
+        return Vec3(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x)
