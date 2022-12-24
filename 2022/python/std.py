@@ -282,6 +282,53 @@ def summary(filename):
         print("\n".join(data[:10]))
 
 
+
+class Vec2:
+    x: float
+    y: float
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f"Vec2({self.x},{self.y})"
+
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return self.x == other.x and self.y == other.y
+        return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __add__(self, other):
+        return Vec2(self.x + other.x, self.y + other.y)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __neg__(self):
+        return Vec2(-self.x, -self.y)
+
+    def __sub__(self, other):
+        return Vec2(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, other):
+        if type(self) is type(other):
+            return Vec2(self.x * other.x, self.y * other.y)
+        return Vec2(self.x * other, self.y * other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __abs__(self):  # taxi
+        return abs(self.x) + abs(self.y)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+
 class Vec3:
     x: float
     y: float
