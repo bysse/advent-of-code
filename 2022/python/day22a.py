@@ -55,8 +55,6 @@ def one_step(x, y, dx, dy):
     raise Exception("ERROR")
 
 
-
-
 direction = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 token = ['>', 'v', '<', '^']
 colors = {

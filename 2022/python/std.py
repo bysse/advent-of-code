@@ -378,3 +378,6 @@ class Vec3:
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x)
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
