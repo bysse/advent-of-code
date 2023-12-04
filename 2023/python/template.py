@@ -8,11 +8,14 @@ DAY = "04"
 INPUT = f"../input/input{DAY}.txt"
 # INPUT = "../input/test.txt"
 
+A = 0
+B = 0
+
 data = []
 for line in lines(INPUT):
     data.append(ints(line))
 
 summary(INPUT)
 
-print("A:")
-print("B:")
+print("A:", A)
+print("B:", B)
