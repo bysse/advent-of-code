@@ -1,23 +1,8 @@
-import time
-
 from std import *
-import copy
-import re
-import functools
-import itertools
 
 DAY = "04"
 INPUT = f"../input/input{DAY}.txt"
 #INPUT = "../input/test.txt"
-
-
-def n_winning(a, b):
-    c = 0
-    for n in a:
-        if n in b:
-            c += 1
-    return c
-
 
 data = []
 for line in lines(INPUT):
@@ -25,17 +10,14 @@ for line in lines(INPUT):
     win, ticket = card.split('|')
     data.append((set(ints(win)), set(ints(ticket))))
 
-points = []
+A = 0
 matches = []
 for win, ticket in data:
-    n = n_winning(win, ticket)
+    n = len(win & ticket)
     p = 1 << (n - 1) if n > 0 else 0
-    points.append(p)
+    A += p
     matches.append(n)
 
-A = sum(points)
-
-t0 = time.time()
 for i in range(len(matches) - 1, -1, -1):
     p = matches[i]
     s = 0
