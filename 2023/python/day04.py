@@ -8,7 +8,7 @@ data = []
 for line in lines(INPUT):
     _, card = line.split(':')
     win, ticket = card.split('|')
-    data.append((set(ints(win)), set(ints(ticket))))
+    data.append((set(win.split()), set(ticket.split())))
 
 A = 0
 matches = []
