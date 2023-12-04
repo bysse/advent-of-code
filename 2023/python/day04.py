@@ -1,3 +1,5 @@
+import time
+
 from std import *
 import copy
 import re
@@ -6,7 +8,7 @@ import itertools
 
 DAY = "04"
 INPUT = f"../input/input{DAY}.txt"
-INPUT = "../input/test.txt"
+#INPUT = "../input/test.txt"
 
 
 def n_winning(a, b):
@@ -24,24 +26,26 @@ for line in lines(INPUT):
     data.append((set(ints(win)), set(ints(ticket))))
 
 points = []
+matches = []
 for win, ticket in data:
     n = n_winning(win, ticket)
     p = 1 << (n - 1) if n > 0 else 0
     points.append(p)
+    matches.append(n)
 
 A = sum(points)
-B = 0
 
-for i in range(len(points) - 1, -1, -1):
-    p = points[i]
+t0 = time.time()
+for i in range(len(matches) - 1, -1, -1):
+    p = matches[i]
     s = 0
-    for j in range(i, i + p):
-        if j >= len(points):
+    for j in range(0, p):
+        idx = i + j + 1
+        if idx >= len(matches):
             break
-        s += points[j]
-    points[i] = s
-    print(points)
-print(sum(points))
+        s += matches[idx]
+    matches[i] = s + 1
+B = sum(matches)
 
 print("A:", A)
 print("B:", B)
