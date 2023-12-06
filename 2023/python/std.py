@@ -158,6 +158,7 @@ def adjacent_2d(x, y, width, height, include_center=False):
                 continue
             yield x + dx, y + dy
 
+
 def adjacent_3d(x, y, z):
     """ Iterator for all adjacent coordinates within the specified rect"""
     yield x + 0, y + 0, z + 1
@@ -282,7 +283,6 @@ def summary(filename):
         print("\n".join(data[:10]))
 
 
-
 class Vec2:
     x: float
     y: float
@@ -381,3 +381,86 @@ class Vec3:
 
     def __hash__(self):
         return hash((self.x, self.y, self.z))
+
+
+class Interval:
+    x0: int
+    x1: int
+
+    def __init__(self, x0, x1):
+        if x0 > x1:
+            x0, x1 = x1, x0
+        self.x0 = x0
+        self.x1 = x1
+
+    def empty(self):
+        return self.x0 == self.x1
+
+    def length(self):
+        return self.x1 - self.x0
+
+    def intersect(self, interval):
+        if self.x1 <= interval.x0:
+            return None
+        if self.x0 >= interval.x1:
+            return None
+
+        i = Interval(max(self.x0, interval.x0), min(self.x1, interval.x1))
+        if i.empty():
+            return None
+        return i
+
+    def nand(self, interval):
+        if interval == self:
+            return []
+        i = self.intersect(interval)
+        if not i or i == self or i == interval:
+            return []
+        min_x = min(self.x0, interval.x0)
+        max_x = max(self.x1, interval.x1)
+        return [Interval(min_x, i.x0), Interval(i.x1, max_x)]
+
+    def cut_out(self, interval):
+        if interval == self:
+            return []
+        #    |-------|
+        # |----|
+        #
+        if self not in interval:
+            return [self]
+
+        if self.x1 < interval.x1:
+            if self.x0 < interval.x0:
+                return [Interval(self.x0, interval.x0)]
+            else:
+                return []
+
+        if self.x0 > interval.x0:
+            if self.x1 >= interval.x1:
+                return [Interval(interval.x1, self.x1)]
+            else:
+                return []
+
+        return [Interval(self.x0, interval.x0), Interval(interval.x1, self.x1)]
+
+    def __contains__(self, item):
+        if isinstance(item, Interval):
+            return self.x0 <= item.x0 < self.x1 or self.x0 < item.x1 < self.x1 or item.x0 <= self.x0 < item.x1 or \
+                item.x0 < self.x1 < item.x1
+
+        return self.x0 <= item <= self.x1
+
+    def __eq__(self, other):
+        if isinstance(other, Interval):
+            return self.x0 == other.x0 and self.x1 == other.x1
+        return False
+
+    def __repr__(self):
+        return f"Interval({self.x0},{self.x1})"
+
+
+# print(Interval(0, 100).cut_out(Interval(150, 250)))
+# print(Interval(0, 100).cut_out(Interval(-50, 150)))
+# print(Interval(0, 100).cut_out(Interval(-50, 50)))
+# print(Interval(0, 100).cut_out(Interval(50, 150)))
+# print(Interval(0, 100).cut_out(Interval(25, 75)))
