@@ -4,9 +4,9 @@ import re
 import functools
 import itertools
 
-DAY = "04"
+DAY = re.sub(r"day(\d\d).py", r"\1", os.path.basename(__file__))
 INPUT = f"../input/input{DAY}.txt"
-# INPUT = "../input/test.txt"
+# INPUT = f"../input/test{DAY}.txt"
 
 A = 0
 B = 0
