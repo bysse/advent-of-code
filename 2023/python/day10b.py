@@ -22,7 +22,7 @@ big_pipes = {
     'J': ['.', '|', '.', '-', 'J', '.', '.', '.', '.'],
     '7': ['.', '.', '.', '-', '7', '.', '.', '|', '.'],
     'F': ['.', '.', '.', '.', 'F', '-', '.', '|', '.'],
-    'S': ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
+    'S': ['.', 'S', '.', 'S', 'S', 'S', '.', 'S', '.'],
 }
 
 A = 0
@@ -130,8 +130,8 @@ def count_dots(x, y):
     return dots
 
 B = 0
-for y in range(width):
-    for x in range(height):
+for y in range(height):
+    for x in range(width):
         dots = count_dots(x, y)
         if dots == 9:
             B += 1
@@ -140,6 +140,3 @@ dump_2d(big)
 
 print("A:", A)
 print("B:", B)
-
-# 522 too low
-# 521 too low
