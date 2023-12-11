@@ -77,8 +77,6 @@ for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
 
 A = int(max_length / 2)
 
-data, _, w = load_2d(INPUT)
-
 inside_points = set()
 for i in range(1, len(max_position)):
     p = max_position[i]
@@ -101,20 +99,12 @@ def flood_fill(p0, max_visited, data=None):
     return n
 
 
-for y in range(height):
-    for x in range(width+1):
-        if (x, y) in max_visited:
-            #data[y][x] = 'o'
-            continue
-        data[y][x] = '.'
-
 B = 0
 for p in inside_points:
     if p in max_visited:
         continue
-    B += flood_fill(p, max_visited, data)
+    B += flood_fill(p, max_visited)
 
-dump_2d(data)
 
 print("A:", A)
 print("B:", B)
