@@ -1,8 +1,6 @@
+import collections
+
 from std import *
-import copy
-import re
-import functools
-import itertools
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
@@ -17,10 +15,21 @@ pipes = {
     'F': [(1, 0), (0, 1)],
 }
 
+big_pipes = {
+    '|': ['.', '|', '.', '.', '|', '.', '.', '|', '.'],
+    '-': ['.', '.', '.', '-', '-', '-', '.', '.', '.'],
+    'L': ['.', '|', '.', '.', 'L', '-', '.', '.', '.'],
+    'J': ['.', '|', '.', '-', 'J', '.', '.', '.', '.'],
+    '7': ['.', '.', '.', '-', '7', '.', '.', '|', '.'],
+    'F': ['.', '.', '.', '.', 'F', '-', '.', '|', '.'],
+    'S': ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
+}
+
 A = 0
 B = 0
 
 field = {}
+points = set()
 y = 0
 width = 0
 height = 0
@@ -28,6 +37,7 @@ start = None
 for line in lines(INPUT):
     for x, ch in enumerate(line.strip()):
         if ch == '.':
+            points.add((x, y))
             continue
         if ch == 'S':
             start = (x, y)
@@ -74,37 +84,59 @@ for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             max_visited = visited
             max_position = positions
 
-
 A = int(max_length / 2)
 
-inside_points = set()
-for i in range(1, len(max_position)):
-    p = max_position[i]
-    pp = max_position[i-1]
-    dx = p[0] - pp[0]
-    dy = p[1] - pp[1]
-    inside_points.add((p[0] - dy, p[1] + dx))
+
+def flood_fill(p0, data):
+    q = collections.deque()
+    q.append(p0)
+
+    while q:
+        p = q.popleft()
+        if p[0] < 0 or p[1] < 0:
+            continue
+        if p[0] >= len(data[0]) or p[1] >= len(data):
+            continue
+        if data[p[1]][p[0]] != '.':
+            continue
+        data[p[1]][p[0]] = ' '
+
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            q.append((p[0] + dx, p[1] + dy))
 
 
-def flood_fill(p0, max_visited, data=None):
-    if p0 in max_visited:
+big = [['.' for _ in range(3 * (width + 1))] for _ in range(3 * (height + 1))]
+
+for x, y, in max_position:
+    bp = field[(x, y)]
+    i = 0
+    for dy in range(3):
+        for dx in range(3):
+            big[3 * y + dy][3 * x + dx] = big_pipes[bp][i]
+            i += 1
+
+flood_fill((0, 0), big)
+
+
+def count_dots(x, y):
+    if 3*y >= len(big) or 3*x >= len(big[0]):
         return 0
-    max_visited.add(p0)
-    if data:
-        data[p0[1]][p0[0]] = '#'
-    n = 1
-    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-        p = (p0[0] + dx, p0[1] + dy)
-        n += flood_fill(p, max_visited, data)
-    return n
 
+    dots = 0
+    for dx in range(3):
+        for dy in range(3):
+            if big[3 * y + dy][3 * x + dx] == '.':
+                dots += 1
+    return dots
 
 B = 0
-for p in inside_points:
-    if p in max_visited:
-        continue
-    B += flood_fill(p, max_visited)
+for y in range(width):
+    for x in range(height):
+        dots = count_dots(x, y)
+        if dots == 9:
+            B += 1
 
+dump_2d(big)
 
 print("A:", A)
 print("B:", B)
