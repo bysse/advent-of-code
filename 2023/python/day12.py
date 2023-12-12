@@ -1,13 +1,15 @@
+from functools import cache
+
 from std import *
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
-#INPUT = f"../input/test{DAY}.txt"
+# INPUT = f"../input/test{DAY}.txt"
 
-A = 0
+# NOTE: Too slow for B
 
 
-def validate_groups(pattern: list, groups: list) -> bool:
+def validate_groups(pattern: str, groups: tuple) -> bool:
     i = 0
     for group in groups:
         rl = 0
@@ -35,27 +37,26 @@ def validate_groups(pattern: list, groups: list) -> bool:
     return True
 
 
-def fix_next(pattern: list):
+def fix_next(pattern: str):
     for i, ch in enumerate(pattern):
         if ch == '?':
-            a = pattern[:]
+            a = list(pattern)
             a[i] = '#'
-            b = pattern[:]
+            b = list(pattern)
             b[i] = '.'
-            return [a, b]
+            return ["".join(a), "".join(b)]
     return []
 
 
-def fit_group(pattern: list, groups: list):
+@cache
+def fit_group(pattern: str, groups: tuple):
     variables = pattern.count('?')
     if variables == 0:
-        # print(" -", "".join(pattern), groups)
         return 1 if validate_groups(pattern, groups) else 0
 
     n = 0
     for subpattern in fix_next(pattern):
         if validate_groups(subpattern, groups):
-            #print(" -", "".join(subpattern), groups)
             n += fit_group(subpattern, groups)
     return n
 
@@ -65,16 +66,25 @@ def unfold(pattern, groups):
     for i in range(4):
         p2.append('?')
         p2 += pattern
-    return p2, list(5*groups)
+    return p2, list(5 * groups)
 
+
+A = 0
+B = 0
+for line in lines(INPUT):
+    pattern, b = line.split()
+    group = tuple(ints(b))
+    n = fit_group(pattern, group)
+    A += n
+print("A:", A)
 
 for line in lines(INPUT):
-    a, b = line.split()
-    group = ints(b)
-    total_broken = sum(group)
-    an = fit_group(list(a), group)
-    A += an
+    pattern, b = line.split()
+    pattern_5x = "?".join(5 * [pattern])
+    group_5x = 5 * tuple(ints(b))
+
+    n = fit_group(pattern_5x, group_5x)
+    B += n
 
 
-print("A:", A)
-print("B:", "<too slow for B>")
+print("B:", B)
