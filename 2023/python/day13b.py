@@ -1,31 +1,42 @@
 from std import *
+import copy
+import re
+import functools
+import itertools
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
 #INPUT = f"../input/test{DAY}.txt"
 
 
+def compare_with_smudge(a, b):
+    c = 0
+    for i,j in zip(a, b):
+        if i != j:
+            c += 1
+    return c
+
+
 def find_reflection(data):
     height = len(data)
     for y in range(1, len(data)):
-        if data[y] == data[y - 1]:
-            # verify perfect reflection
-            found = True
-            for dy in range(min(y, height - y)):
-                if data[y + dy] != data[y - dy - 1]:
-                    found = False
-                    break
-            if found:
-                return y
+        found = True
+        smudges = 0
+        for dy in range(min(y, height - y)):
+            smudges += compare_with_smudge(data[y + dy], data[y - dy - 1])
+            if smudges > 1:
+                found = False
+                break
+        if found and smudges == 1:
+            return y
     return -1
 
 
-A = 0
-
+B = 0
 for group in groups(INPUT):
     row = find_reflection(group)
     if row >= 0:
-        A += 100 * row
+        B += 100 * row
         continue
 
     group_t = ["" for _ in range(len(group[0]))]
@@ -34,6 +45,6 @@ for group in groups(INPUT):
             group_t[x] += ch
 
     col = find_reflection(group_t)
-    A += col
+    B += col
 
-print("A:", A)
+print("B:", B)

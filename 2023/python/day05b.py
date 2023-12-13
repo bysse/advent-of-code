@@ -53,7 +53,6 @@ def map_seed_list(seed_list, mapping):
 
 
 for seed in seeds:
-    print(seed)
     seed_list = [seed]
     for mapping in mappings:
         seed_list = map_seed_list(seed_list, mapping)
