@@ -6,7 +6,7 @@ import itertools
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
-#INPUT = f"../input/test{DAY}.txt"
+# INPUT = f"../input/test{DAY}.txt"
 
 A = 0
 B = 0
@@ -22,11 +22,28 @@ def part_a(data):
     return weight(data)
 
 
+def key(data):
+    return "".join(map(lambda x: "".join(x), data))
+
+
 def part_b(data):
-    for i in range(0, 100):
+    states = {}
+    for i in range(0, 150):
         cycle(data)
+        k = key(data)
+        if k in states:
+            cycle_length = i - states[k]
+            print("Cycle found at iteration", i, "with length", cycle_length)
+            overflow = ((1000000000 - states[k]) % cycle_length)
+            print("Overflow is", overflow)
+            for _ in range(overflow - 1):
+                cycle(data)
+            w = weight(data)
+            break
+        states[k] = i
         w = weight(data)
     return w
+
 
 def cycle(data):
     while tilt_north(data):
@@ -42,7 +59,7 @@ def cycle(data):
 def tilt_north(data):
     changed = 0
     for y in range(1, len(data)):
-        target = data[y-1]
+        target = data[y - 1]
         this = data[y]
         for x in range(len(data[0])):
             if this[x] == '.' or this[x] == '#':
@@ -57,7 +74,7 @@ def tilt_north(data):
 def tilt_south(data):
     changed = 0
     for y in range(len(data) - 2, -1, -1):
-        target = data[y+1]
+        target = data[y + 1]
         current = data[y]
         for x in range(len(current)):
             if current[x] != 'O':
@@ -75,8 +92,8 @@ def tilt_east(data):
         for x in range(len(data[0]) - 2, -1, -1):
             if line[x] == '.' or line[x] == '#':
                 continue
-            if line[x+1] == '.':
-                line[x+1] = 'O'
+            if line[x + 1] == '.':
+                line[x + 1] = 'O'
                 line[x] = '.'
                 changed += 1
     return changed
@@ -88,8 +105,8 @@ def tilt_west(data):
         for x in range(1, len(data[0])):
             if line[x] != 'O':
                 continue
-            if line[x-1] == '.':
-                line[x-1] = 'O'
+            if line[x - 1] == '.':
+                line[x - 1] = 'O'
                 line[x] = '.'
                 changed += 1
     return changed
