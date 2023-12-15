@@ -6,7 +6,7 @@ import itertools
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
-INPUT = f"../input/test{DAY}.txt"
+#INPUT = f"../input/test{DAY}.txt"
 
 A = 0
 B = 0
@@ -27,13 +27,32 @@ for line in lines(INPUT):
 
 for op in data:
     fl = ints(op)
-    ops.append((op, hash(op), '-' if'-' in op else '=', fl[0] if fl else -1))
+    label = op.split("-")[0].split("=")[0]
+    ops.append((label, hash(label), '-' if '-' in op else '=', fl[0] if fl else -1))
 
 for seq in data:
     A += hash(seq)
 
+buckets = [[] for _ in range(256)]
+for (label, bucket, op, focal) in ops:
+    if op == '-':
+        for lens in buckets[bucket]:
+            if lens[0] == label:
+                buckets[bucket].remove(lens)
+                break
+    if op == '=':
+        found = False
+        for i, lens in enumerate(buckets[bucket]):
+            if lens[0] == label:
+                found = True
+                buckets[bucket][i] = (label, focal)
+                break
+        if not found:
+            buckets[bucket].append((label, focal))
 
-print(ops)
+for i, bucket in enumerate(buckets):
+    for j, lens in enumerate(bucket):
+        B += lens[1] * (i + 1) * (j + 1)
 
 print("A:", A)
 print("B:", B)
