@@ -1,4 +1,5 @@
-from queue import Queue
+import heapq
+from collections import defaultdict
 
 from std import *
 import copy
@@ -8,7 +9,7 @@ import itertools
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
-INPUT = f"../input/test{DAY}.txt"
+#INPUT = f"../input/test{DAY}.txt"
 
 data = []
 for line in lines(INPUT):
@@ -18,75 +19,77 @@ w = len(data[0])
 h = len(data)
 
 delta = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-dir_char = ['>', 'v', '<', '^']
 
+def search_a(start, end):
+    # cost, pos (x, y), move (orientation, streak)
+    queue = [(0, start, (0, 0)), (0, start, (1, 0))]
+    node_cost = {}
 
-def search(start, end):
-    #       x, y, d, s
-    que = [(start[0], start[1], 0, 0, [start])]
-    visited = {(start[0], start[1]): 0}
+    while queue:
+        cost, pos, move = heapq.heappop(queue)
+        if pos == end:
+            return cost
 
-    result = 100000000000000
-    sol = 1
+        for next_orientation in [move[0], (move[0] + 1) % 4, (move[0] - 1) % 4]:
+            movement = delta[next_orientation]
+            next_pos = (pos[0] + movement[0], pos[1] + movement[1])
 
-    while que:
-        x, y, direction, streak, path = que.pop(0)
-        c = visited[(x, y)] #, direction, streak)]
-
-        # Check for exit
-        if x == end[0] and y == end[1]:
-            print()
-            for y, line in enumerate(data):
-                for x, ch in enumerate(line):
-                    if (x, y) in path:
-                        print("#", end="")
-                    else:
-                        print(ch, end="")
-                print()
-
-            result = min(result, c)
-            break
-
-        if False:
-            for iy, line in enumerate(data):
-                for ix, ch in enumerate(line):
-                    if x == ix and y == iy:
-                        print(dir_char[direction], end="")
-                    else:
-                        print(ch, end="")
-                print()
-
-            print("Cost:", c)
-            print()
-        for next_dir in [direction, (direction + 1) % 4, (direction - 1) % 4]:
-            next_pos = (x + delta[next_dir][0], y + delta[next_dir][1])
-            next_streak = streak + 1 if next_dir == direction else 0
-            if next_streak > 3:
+            if next_pos[0] < 0 or next_pos[0] >= w or next_pos[1] < 0 or next_pos[1] >= h:
                 continue
-            if next_pos[0] < 0 or next_pos[1] < 0 or next_pos[0] >= w or next_pos[1] >= h:
+            next_streak = move[1] + 1 if next_orientation == move[0] else 0
+            if next_streak >= 3:
                 continue
-            next_cost = c + data[next_pos[1]][next_pos[0]]
-            key = (next_pos[0], next_pos[1]) #, next_dir, next_streak)
-            if key in visited:
-                old_cost = visited[key]
-                if old_cost < next_cost:
-                    continue
-            # valid pos, replace in visited
-            visited[key] = next_cost
 
-            p2 = path[:] + [next_pos]
-            que.append((next_pos[0], next_pos[1], next_dir, next_streak, p2))
+            next_cost = data[next_pos[1]][next_pos[0]] + cost
+            next_move = (next_orientation, next_streak)
+            next_key = (next_pos, next_move)
 
-        que.sort(key=lambda l: l[3])
-        print(len(que))
+            if next_cost < node_cost.get(next_key, 999999999):
+                heapq.heappush(queue, (next_cost, next_pos, next_move))
+                node_cost[next_key] = next_cost
 
-    return result
+    return -1
 
 
-A = search((0, 0), (w - 1, h - 1))
-B = 0
+def search_b(start, end):
+    # cost, pos (x, y), move (orientation, streak)
+    queue = [(0, start, (0, 0)), (0, start, (1, 0))]
+    node_cost = {}
+
+    while queue:
+        cost, pos, move = heapq.heappop(queue)
+        if pos == end and move[1] >= 3:
+            return cost
+
+        for next_orientation in [move[0], (move[0] + 1) % 4, (move[0] - 1) % 4]:
+            movement = delta[next_orientation]
+            next_pos = (pos[0] + movement[0], pos[1] + movement[1])
+
+            if next_pos[0] < 0 or next_pos[0] >= w or next_pos[1] < 0 or next_pos[1] >= h:
+                continue
+            if move[0] != next_orientation and move[1] < 3:
+                continue
+            next_streak = move[1] + 1 if next_orientation == move[0] else 0
+            if next_streak >= 10:
+                continue
+
+            next_cost = data[next_pos[1]][next_pos[0]] + cost
+            next_move = (next_orientation, next_streak)
+            next_key = (next_pos, next_move)
+
+            if next_cost < node_cost.get(next_key, 999999999):
+                heapq.heappush(queue, (next_cost, next_pos, next_move))
+                node_cost[next_key] = next_cost
+
+    return -1
+
+
+
+A = 0
+A = search_a((0, 0), (w - 1, h - 1))
+B = search_b((0, 0), (w - 1, h - 1))
 
 print("A:", A)
 print("B:", B)
 
-# 888 too high
+# 1006 too low
