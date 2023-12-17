@@ -9,7 +9,7 @@ import itertools
 
 DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
-#INPUT = f"../input/test{DAY}.txt"
+# INPUT = f"../input/test{DAY}.txt"
 
 data = []
 for line in lines(INPUT):
@@ -19,6 +19,7 @@ w = len(data[0])
 h = len(data)
 
 delta = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+
 
 def search_a(start, end):
     # cost, pos (x, y), move (orientation, streak)
@@ -53,7 +54,7 @@ def search_a(start, end):
 
 def search_b(start, end):
     # cost, pos (x, y), move (orientation, streak)
-    queue = [(0, start, (0, 0)), (0, start, (1, 0))]
+    queue = [(data[0][1], (1, 0), (0, 0)), (data[1][0], (0, 1), (1, 0))]
     node_cost = {}
 
     while queue:
@@ -84,8 +85,6 @@ def search_b(start, end):
     return -1
 
 
-
-A = 0
 A = search_a((0, 0), (w - 1, h - 1))
 B = search_b((0, 0), (w - 1, h - 1))
 
