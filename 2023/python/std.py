@@ -302,6 +302,11 @@ class Vec2:
     def __ne__(self, other):
         return not (self == other)
 
+    def __lt__(self, other):
+        if type(self) is type(other):
+            return self.x < other.x and self.y < other.y
+        return False
+
     def __add__(self, other):
         return Vec2(self.x + other.x, self.y + other.y)
 
@@ -349,6 +354,11 @@ class Vec3:
 
     def __ne__(self, other):
         return not (self == other)
+
+    def __lt__(self, other):
+        if type(self) is type(other):
+            return self.x < other.x and self.y < other.y and self.z < other.z
+        return False
 
     def __add__(self, other):
         return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
