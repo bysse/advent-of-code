@@ -248,6 +248,9 @@ class Map(dict):
         super(Map, self).__setitem__(key, value)
         self.__dict__.update({key: value})
 
+    def keys(self):
+        return self.__dict__.keys()[:]
+
     def __delattr__(self, item):
         self.__delitem__(item)
 

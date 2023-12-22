@@ -1,4 +1,5 @@
 from collections import defaultdict
+from math import lcm
 
 from std import *
 import copy
@@ -18,6 +19,19 @@ for line in lines(INPUT):
         continue
     gates[gate[1:]] = Map({'op': gate[0], 'mem': {}, 'out': [x.strip() for x in outs.split(",")]})
 
+print("digraph G {")
+op = {'!': '!', '%': '\\%', '&': '&'}
+for k, v in gates.items():
+    name = f"\"{op[v.op]}{k}\""
+    out = []
+    for o in v.out:
+        if o in gates:
+            out.append(f"\"{op[gates[o].op]}{o}\"")
+        else:
+            out.append(o)
+    out = ", ".join(out)
+    print(f"   {name} -> {out}")
+print("}")
 
 for k, v in gates.items():
     for out in v.out:
@@ -25,20 +39,16 @@ for k, v in gates.items():
             gates[out].mem[k] = False
 
 
-def button():
-    queue = [('broadcaster', False, None)]
+def button(gates, initial_gate, captures, iteration):
+    queue = [initial_gate]
 
-    rx_pulses = 0
-    single_low = False
+    found = set()
 
     while queue:
         name, pulse, sender = queue.pop(0)
 
-        if name == 'rx':
-            if rx_pulses == 0 and pulse is False:
-                single_low = True
-            else:
-                single_low = False
+        if sender in captures and pulse:
+            found.add(sender)
 
         if name not in gates:
             continue
@@ -65,21 +75,22 @@ def button():
         else:
             raise Exception(f"Unknown gate {name}")
 
-    return single_low
+    return found
 
 
-# TODO: Check path to rx and check for cycles
+# xz -> mp = High
+# ns -> qt = High
+# sg -> ng = High
+# pj -> qb = High
 
-B = 0
-iter = 1
-while True:
-    sl = button()
-    if sl:
-        B = iter
+cycles = {}
+for i in range(1, 100_000):
+    found = button(gates, ('broadcaster', False, None), ['mp', 'qt', 'ng', 'qb'], i)
+    for entry in found:
+        if entry not in cycles:
+            cycles[entry] = i
+    if len(cycles) == 4:
         break
-    iter += 1
 
-    if iter % 1000 == 0:
-        print(iter)
-
-print("B:", B)
+print("Cycles:", cycles)
+print("B:", lcm(*cycles.values()))
