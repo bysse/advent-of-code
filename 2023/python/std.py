@@ -337,6 +337,57 @@ class Vec2:
         return hash((self.x, self.y))
 
 
+class IVec2:
+    x: int
+    y: int
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f"IVec2({self.x},{self.y})"
+
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return self.x == other.x and self.y == other.y
+        return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __lt__(self, other):
+        if type(self) is type(other):
+            return self.x < other.x and self.y < other.y
+        return False
+
+    def __add__(self, other):
+        return IVec2(self.x + other.x, self.y + other.y)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __neg__(self):
+        return IVec2(-self.x, -self.y)
+
+    def __sub__(self, other):
+        return IVec2(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, other):
+        if type(self) is type(other):
+            return IVec2(self.x * other.x, self.y * other.y)
+        return IVec2(self.x * other, self.y * other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __abs__(self):  # taxi
+        return abs(self.x) + abs(self.y)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+
 class Vec3:
     x: float
     y: float
