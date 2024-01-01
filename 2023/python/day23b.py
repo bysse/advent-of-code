@@ -56,28 +56,27 @@ for i in intersections:
     for ni in neighbours[i]:
         dx = ni[0] - i[0]
         dy = ni[1] - i[1]
-        if data[ni] in slopes and slopes[data[ni]] != (dx, dy):
-            continue
         node, size = find_size(ni, i)
         dag.setdefault(i, set()).add((size, node))
 
+last = max(data)
 
-A = 0
-queue = [(0, (1, 0), [(1, 0)])]
-visited = {}
 
-while queue:
-    cost, pos, path = heapq.heappop(queue)
-    if pos == max(data):
-        A = -cost
-        continue
+def dfs(pos, cost, visited):
+    if pos == last:
+        return cost
 
-    visited[pos] = cost
+    visited.add(pos)
 
-    for size, np in dag[pos]:
-        nc = cost - size
-        if np in visited and visited[np] < nc:
+    max_cost = 0
+    for size, node in dag[pos]:
+        if node in visited:
             continue
-        heapq.heappush(queue, (nc, np, path[:] + [np]))
+        branch_cost = dfs(node, cost + size, copy.copy(visited))
+        if branch_cost > max_cost:
+            max_cost = branch_cost
+    return max_cost
 
-print("A:", A)
+
+B = dfs((1, 0), 0, set())
+print("B:", B)
