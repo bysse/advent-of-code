@@ -52,7 +52,7 @@ def touches(brick, h_map, dz):
     return False
 
 
-support = defaultdict(set)
+supported = defaultdict(set)
 for n, brick in enumerate(data):
     dz = 0
     while not touches(brick, height, dz):
@@ -61,13 +61,45 @@ for n, brick in enumerate(data):
     for (x, y, z) in brick:
         (z0, brick_id) = height[y][x]
         if z0 == z + dz:
-            support[n].add(brick_id)
-        height[y][x] = (z + dz, n)
+            supported[n].add(brick_id)
+        if height[y][x][0] < z + dz + 1:
+            height[y][x] = (z + dz + 1, n)
+
+    #for y in range(len(height)):
+    #    for x in range(len(height[y])):
+    #        z = height[y][x][0]
+    #        print(f"{z:1} ", end="")
+    #    print("")
+    #print("")
+
+
+supports = defaultdict(set)
+for brick, below in supported.items():
+    for b in below:
+        supports[b].add(brick)
+
+# TODO: Blocks look ok,but we need to check the support of the last brick
+# TODO: can be removed doesn't work as intended
+
+
+def can_be_removed(brick_id):
+    print(f"Can brick {brick_id} be removed?")
+    for id in supports[brick_id]:
+        print("  + Checking brick", id, "which is supported by", brick_id)
+        print("  + Supported by", supported[id])
+        if len(supported[id]) == 1:
+            return False
+    return True
+
 
 for n, brick in enumerate(data):
-    for above in range(n, len(data)):
-        pass
-print(support)
+    if can_be_removed(n):
+        print(n)
+
+
+print(supported)
+print(supports)
+print("Brick 5 cant be removed")
 
 print("A:", A)
 print("B:", B)
