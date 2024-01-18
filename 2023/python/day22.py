@@ -32,9 +32,6 @@ for line in lines(INPUT):
 
 data.sort(key=lambda b: b[0][2])
 
-A = 0
-B = 0
-
 # height is (height, brick)
 height = defaultdict(lambda: (0, -1))
 
@@ -76,6 +73,14 @@ A = 0
 for n, brick in enumerate(data):
     if not any(len(supported_by[j]) == 1 for j in supports[n]):
         A += 1
-
 print("A:", A)
+
+B = 0
+for n, brick in enumerate(data):
+    removed = {n}
+    for m in range(n + 1, len(data)):
+        if supported_by[m].issubset(removed):
+            removed.add(m)
+    B += len(removed) - 1
+
 print("B:", B)
