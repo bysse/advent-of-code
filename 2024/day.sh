@@ -28,6 +28,5 @@ echo "from .$DAY import *" > $LANG/$DAY/__init__.py
 touch $LANG/$DAY/test.txt
 
 curl "https://adventofcode.com/$YEAR/day/$1/input" \
-  -H 'cookie: _ga=GA1.2.1906575322.1732997985; _gid=GA1.2.582259701.1732997985; session=53616c7465645f5fb1d69a480a4b793faa38dabb2cf744cf7dc3a5cb43b7295ad2b9cb071035e12e7e2f6aa2281a57f13c1aa204c596da4a4eebf9261b6b9c76; _gat=1; _ga_MHSNPJKWC7=GS1.2.1733167273.5.1.1733168945.0.0.0' \
   -H 'referer: https://adventofcode.com/2024/day/2' \
   -o $LANG/$DAY/input.txt

@@ -14,16 +14,13 @@ def main(input_file):
     for (y, line) in enumerate(lines(input_file)):
         field.append(line)
         if "^" in line:
-            start = (line.index("^"), y)
-
-    pos = start
-    delta = (0, -1)
+            pos = start = (line.index("^"), y)
 
     width = len(field[0])
     height = len(field)
 
+    delta = (0, -1)
     visited = set()
-    intersections = defaultdict(lambda: set())
 
     max_length = 0
     while True:
@@ -39,19 +36,13 @@ def main(input_file):
             pos = np
             max_length += 1
 
-        if pos in visited:
-            intersections[pos].add(delta)
-
-
     print("A:", len(visited))
 
-    for pos, dirs in intersections.items():
-        for delta in dirs:
-            blocker = (pos[0] + delta[0], pos[1] + delta[1])
-            print(blocker)
-            if detect_loop(field, start, (0, -1), blocker, 2*max_length):
-                print("loop:", pos)
-        pass
+    B = 0
+    for blocker in visited:
+        if detect_loop(field, start, (0, -1), blocker, 1.5*max_length):
+            B += 1
+    print("B:", B)
 
 
 def detect_loop(field, pos, delta, extra, max_length):
@@ -85,5 +76,5 @@ def rotate_right(delta):
         return 0, -1
 
 if __name__ == "__main__":
-    #main("input.txt")
-    main("test.txt")
+    main("input.txt")
+    #main("test.txt")
