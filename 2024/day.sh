@@ -14,8 +14,9 @@ if [ ! -e "$DAY" ]; then
     mkdir "$LANG/$DAY"
 fi
 
-
-cp $LANG/template/template.py $LANG/$DAY/$DAY.py
+if [ ! -e $LANG/$DAY/$DAY.py ]; then
+  cp $LANG/template/template.py $LANG/$DAY/$DAY.py
+fi
 
 tee $LANG/$DAY/test_run.py << EOF
 from .$DAY import main
@@ -24,9 +25,24 @@ if __name__ == "__main__":
     main("test.txt")
 EOF
 
+tee $LANG/$DAY/__main__.py << EOF
+import os
+import sys
+from .$DAY import main
+input_file = os.path.join(os.path.dirname(__file__), "input.txt")
+
+if len(sys.argv) > 1:
+    input_file = sys.argv[1]
+
+main(input_file)
+EOF
+
+
 echo "from .$DAY import *" > $LANG/$DAY/__init__.py
 touch $LANG/$DAY/test.txt
 
-curl "https://adventofcode.com/$YEAR/day/$1/input" \
-  -H 'referer: https://adventofcode.com/2024/day/2' \
-  -o $LANG/$DAY/input.txt
+if [ ! -e $LANG/$DAY/input.txt ]; then
+  curl "https://adventofcode.com/$YEAR/day/$1/input" \
+    -H 'referer: https://adventofcode.com/2024/day/2' \
+    -o $LANG/$DAY/input.txt
+fi
