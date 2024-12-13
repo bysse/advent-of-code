@@ -9,26 +9,27 @@ def calc(machine, num_a, num_b):
     return machine['a'][0] * num_a + machine['b'][0] * num_b, machine['a'][1] * num_a + machine['b'][1] * num_b
 
 
-def solve_a(data):
-    goal = data['goal']
-    a = data['a']
-    b = data['b']
+def solve_b(data):
+    ax, ay = data['a']
+    bx, by = data['b']
+    gx, gy = data['goal']
 
-    num_a = 0
-    num_b = int(min(goal[0] / b[0], goal[1] / b[1]))
+    a_nom = gy * bx - gx * by
+    a_den = ay * bx - ax * by
 
-    while num_b >= 0:
-        value = calc(data, num_a, num_b)
-        print(num_a, num_b, value, goal)
-        if value == goal:
-            print("ok")
-            return num_a*2 + num_b
+    b_nom = gy * ax - gx * ay
+    b_den = ax * by - ay * bx
 
-        while goal[0]-value[0] >= a[0] and goal[1]-value[1] >= a[1]:
-            num_a += 1
-        num_b-=1
+    if a_den == 0 or b_den == 0:
+        return 0
 
-    return 0
+    a = a_nom / a_den
+    b = b_nom / b_den
+
+    if int(a) != a or int(b) != b:
+        return 0
+
+    return int(a * 3 + b)
 
 
 def main(input_file):
@@ -37,19 +38,21 @@ def main(input_file):
         data.append({
             'a': ints(group[0]),
             'b': ints(group[1]),
-            'goal': ints(group[2]),
+            'goal': tuple(ints(group[2])),
         })
 
     A = 0
     B = 0
 
     for machine in data:
-        A += solve_a(machine)
+        A += solve_b(machine)
+        machine['goal'] = (10000000000000 + machine['goal'][0], 10000000000000 + machine['goal'][1])
+        B += solve_b(machine)
 
     print("A:", A)
     print("B:", B)
 
 
 if __name__ == "__main__":
-    # main("input.txt")
-    main("test.txt")
+    main("input.txt")
+    #main("test.txt")
