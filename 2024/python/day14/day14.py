@@ -13,12 +13,12 @@ def evaluate(robots, turns, width, height):
 
 
 def is_tree(pos, width, height):
-    margin = 5
+    count = 0
     for x, y in pos:
-        if margin < x < width-margin:
-            continue
-        return False
-    return True
+        if 35 <= x <= 67 and 45 <= y <= 78:
+            count += 1
+
+    return count > 320
 
 
 def main(input_file):
@@ -48,11 +48,15 @@ def main(input_file):
     pygame.init()
     window = pygame.display.set_mode((2 * width, 2 * height))
 
-    turns = 0
+    pos = evaluate(robots, 18261, width, height)
+    is_tree(pos, width, height)
+
+    turns = 1
     run = True
+    found = False
     while run:
-        turns += 2
-        print(turns)
+        if not found:
+            turns += 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -61,10 +65,13 @@ def main(input_file):
         if not is_tree(pos, width, height):
             continue
 
-        window.fill(0)
+        found = True
+        window.fill(0x00)
         rect = pygame.Rect(window.get_rect().center, (0, 0)).inflate(*([min(window.get_size())//2]*2))
+        for i in range(width):
+            window.set_at((rect.left+i, rect.top-1), 0xffffff)
         for x, y in pos:
-            window.set_at((rect.left + x, rect.top + y), 0xff)
+            window.set_at((rect.left + x, rect.top + y), 0xff00)
 
         pygame.image.save(window, f"frame_{turns}.png")
         pygame.display.flip()
