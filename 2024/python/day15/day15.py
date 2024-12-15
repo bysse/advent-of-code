@@ -1,7 +1,5 @@
 from collections import deque
 
-from six import moves
-
 from std import *
 import copy
 import re
@@ -69,10 +67,13 @@ def move_boxes_b(pos, dx, dy, boxes, walls):
             return False
 
         hit = find_box(*pos, boxes)
-        if not hit:
+        if not hit :
             continue
 
         bx0, by, bx1 = hit
+        if (bx0, by) in apply:
+            continue
+        apply.add((bx0, by))
 
         if dx == 0:
             # vertical movement
@@ -83,10 +84,9 @@ def move_boxes_b(pos, dx, dy, boxes, walls):
         elif dx > 0:
             queue.append((bx1 + 1, by))
 
-        apply.add((bx0, by))
-
     for px, py in apply:
         boxes.remove((px, py))
+    for px, py in apply:
         boxes.add((px + dx, py + dy))
     return True
 
@@ -94,8 +94,8 @@ def move_boxes_b(pos, dx, dy, boxes, walls):
 def solve_b(walls, boxes, robot, moves, width, height):
     index = 0
     for (dx, dy) in moves:
-        dump(width, height, walls, boxes, robot)
-        print(index, dx, dy)
+        #dump(width, height, walls, boxes, robot)
+        #print(index, dx, dy)
         index += 1
 
         x, y = robot
@@ -120,7 +120,7 @@ def dump(width, height, walls, boxes, robot):
                 print("#", end="")
             elif (x, y) in boxes:
                 print("[", end="")
-            elif (x-1, y) in boxes:
+            elif (x - 1, y) in boxes:
                 print("]", end="")
             else:
 
@@ -152,7 +152,7 @@ def main(input_file):
         for c in line:
             moves.append(parse_move(c))
 
-    #print("A:", solve_a(set(walls), set(boxes), robot, moves, width, height))
+    # print("A:", solve_a(set(walls), set(boxes), robot, moves, width, height))
 
     # double the width for everything
     walls2 = set()
@@ -166,13 +166,11 @@ def main(input_file):
 
     robot2 = (robot[0] * 2, robot[1])
 
-
     print("B:", solve_b(walls2, boxes2, robot2, moves, 2 * width, height))
 
 
 if __name__ == "__main__":
-    #main("input.txt")
-
-    main("test.txt")
+    main("input.txt")
+    #main("test.txt")
 
     # too high: 1526833
