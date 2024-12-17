@@ -1,3 +1,6 @@
+import heapq
+from collections import defaultdict, deque
+
 from std import *
 import copy
 import re
@@ -25,24 +28,24 @@ def execute(ops, register: Map):
     while 0 <= ip < len(ops) - 1:
         op = ops[ip]
         value = ops[ip + 1]
-        if op == 0: # ADV
+        if op == 0:  # ADV
             denominator = 1 << combo_literal(value, register)
             register.A = int(register.A / denominator)
-        if op == 1: # BXL
+        if op == 1:  # BXL
             register.B = register.B ^ value
-        if op == 2: # BST
+        if op == 2:  # BST
             register.B = combo_literal(value, register) & 7
-        if op == 3: # JNZ
+        if op == 3:  # JNZ
             if register.A != 0:
                 ip = value - 2
-        if op == 4: # BXC
+        if op == 4:  # BXC
             register.B = register.B ^ register.C
-        if op == 5: # OUT
+        if op == 5:  # OUT
             output.append(combo_literal(value, register) & 7)
-        if op == 6: # BDV
+        if op == 6:  # BDV
             denominator = 1 << combo_literal(value, register)
             register.B = int(register.A / denominator)
-        if op == 7: # CDV
+        if op == 7:  # CDV
             denominator = 1 << combo_literal(value, register)
             register.C = int(register.A / denominator)
 
@@ -52,14 +55,58 @@ def execute(ops, register: Map):
     return output
 
 
+def as_bin(x):
+    return [1 if x & 1 else 0, 1 if x & 2 else 0, 1 if x & 4 else 0]
+
+
+def find(lookup, nums, prev=None):
+    if len(nums) == 0:
+        return prev
+    for A in lookup[nums[-1]]:
+        if prev is None or (A&7) == (prev&7):
+            result = find(lookup, nums[:-1], A>>3)
+            if result is not None:
+                return (result<<3) + (A&3)
+    return None
+
+
+def execute_b(ops, register: Map):
+    # 2 4		:	BST	4	:	BST A	:	B = A & 7
+    # 1 5		:	BXL 5	:	BXL 5	:	B = B ^ 5
+    # 7 5		:	CDV	5	:	CDV B	:	C = A / 2^B
+    # 1 6		:	BXL	6	:	BXL 6	:	B = B ^ 6
+    # 0 3 	    :	ADV	3	:	ADV 3	: 	A = A / 2^3
+    # 4 1		:	BXC	1	:	BXC	_	:	B = B ^ C
+    # 5 5		:	OUT 5	:	OUT B	:	OUT B
+    # 3 0		:	JNZ 0	:			: while (A != 0)
+
+    single = ops[:-2]
+    constraints = list(reversed(ops))
+
+    queue = [(0, constraints)]
+
+    while queue:
+        acc, const = heapq.heappop(queue)
+        if len(const) == 0:
+            return acc
+
+        for i in range(8):
+            A = (acc<<3) + i
+            output = execute(single, Map({'A': A, 'B': 0, 'C': 0}))
+            if output[0] == const[0]:
+                heapq.heappush(queue, (A, const[1:]))
+
+    return -1
+
+
 def test_reg(ops, registers) -> Map:
     reg = Map(registers)
     execute(ops, reg)
     return reg
 
+
 def main(input_file):
     rows = list(lines(input_file))
-    print(rows)
     register = Map({
         'A': ints(rows[0])[0],
         'B': ints(rows[1])[0],
@@ -67,27 +114,11 @@ def main(input_file):
     })
     ops = ints(rows[4])
 
-    # ADV
-    assert test_reg([0, 2], {'A': 20}).A == 5
-    assert test_reg([0, 5], {'A': 20, 'B':1}).A == 10
-    # BXL
-    assert test_reg([1, 3], {'B':3}).B == 0
-    assert test_reg([1, 2], {'B':3}).B == 1
-    # BST
-    assert test_reg([2, 2], {'B': 0}).B == 2
-    assert test_reg([2, 4], {'A': 11, 'B': 0}).B == 3
-    # JNZ
-    assert test_reg([3, 7], {'A': 0}).IP == 2
-    assert test_reg([3, 7], {'A': 1}).IP == 7
-    # BXC
-    assert test_reg([4, 0], {'B': 2, 'C': 3}).B == 1
-    # OUT
-    assert execute([5, 3], Map({}))[0] == 3
-    assert execute([5, 6], Map({'C': 11}))[0] == 3
-
     A = ",".join([str(x) for x in execute(ops, register)])
+    B = execute_b(ops, register)
 
-    B = 0
+    print("Result:  ", execute(ops, Map({'A': B, 'B': 0, 'C': 0})))
+    print("Expected:", ops)
 
     print("A:", A)
     print("B:", B)
@@ -96,3 +127,4 @@ def main(input_file):
 if __name__ == "__main__":
     main("input.txt")
     #main("test.txt")
+    pass
