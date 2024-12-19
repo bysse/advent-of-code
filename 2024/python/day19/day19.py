@@ -1,4 +1,5 @@
 import heapq
+from collections import defaultdict
 from typing import List
 
 from std import *
@@ -7,38 +8,46 @@ import re
 import functools
 import itertools
 
-def match(pattern_list, target):
-    queue = [(0, target, [])]
-    while queue:
-        items, seq, path = heapq.heappop(queue)
-        if not seq:
-            return path
-        for pattern in pattern_list:
-            if seq.startswith(pattern):
-                remaining = seq[len(pattern):]
-                heapq.heappush(queue, (items+1, remaining, path + [pattern]))
-    return None
 
-def match2(pattern_set, target):
+def match4(pattern_set, target):
     max_length = max([len(x) for x in pattern_set])
     target_length = len(target)
-    queue = [(0, 0)]
-    while queue:
-        print(queue)
-        items, index = heapq.heappop(queue)
+    queue = {0}
+    while len(queue) > 0:
+        index = queue.pop()
         if index >= target_length:
             return True
 
-        for i in range(1, max_length):
-            if index + i >= target_length:
+        for i in range(1, max_length + 1):
+            if index + i > target_length:
                 break
-            token = target[index:index+i]
+            token = target[index:index + i]
             if token in pattern_set:
-                print("  ", token)
-                heapq.heappush(queue, (items+1, index+i))
+                queue.add(index + i)
 
     return False
 
+
+def count1(pattern_set, target):
+    max_length = max([len(x) for x in pattern_set])
+    target_length = len(target)
+    queue = defaultdict(int)
+    queue[0] = 1
+    count = 0
+    while len(queue) > 0:
+        index = sorted(queue.keys())[0]
+        ways = queue.pop(index)
+        if index >= target_length:
+            count += ways
+            continue
+
+        for i in range(1, max_length + 1):
+            if index + i > target_length:
+                break
+            token = target[index:index + i]
+            if token in pattern_set:
+                queue[index+i] += ways
+    return count
 
 
 def main(input_file):
@@ -55,15 +64,16 @@ def main(input_file):
     B = 0
 
     for design in design_list:
-        break
-    ret = match2(pattern_set, design_list[0])
-    if ret:
-        A += 1
+        print(design)
+        ret = match4(pattern_set, design)
+        if ret:
+            A += 1
+        B += count1(pattern_set, design)
 
     print("A:", A)
     print("B:", B)
 
 
 if __name__ == "__main__":
-    #main("input.txt")
-    main("test.txt")
+    main("input.txt")
+    #main("test.txt")
