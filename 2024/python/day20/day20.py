@@ -7,19 +7,21 @@ import re
 import functools
 import itertools
 
-
-def solve_optimal(start, end, walls):
+def solve_optimal2(start, end, walls, min_save=100, cheat=2):
     queue = [(0, start)]
     tile_cost = {}
 
+    w, h = max(walls)
+    count = 0
+
     while queue:
         cost, pos = heapq.heappop(queue)
-        if pos == end:
-            return cost
         if pos in tile_cost:
             if tile_cost[pos] < cost:
                 continue
         tile_cost[pos] = cost
+        if pos == end:
+            continue
 
         for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
             x = pos[0] + dx
@@ -29,56 +31,26 @@ def solve_optimal(start, end, walls):
 
             heapq.heappush(queue, (cost + 1, (x, y)))
 
-    return -1
-
-
-def solve_cheats(start, end, walls, max_cost):
-    queue = [(0, start, 0)]
-    tile_cost = {}
-    w, h = max(walls)
-
-    while queue:
-        print(queue)
-        cost, pos, cheated = heapq.heappop(queue)
-        if cost > max_cost:
-            continue
-        if pos == end:
-            print("Solution", cost)
-            continue
-
-        if pos in tile_cost:
-            if tile_cost[pos] < cost:
-                continue
-
-        tile_cost[pos] = cost
-
-        for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
-            x = pos[0] + dx
-            y = pos[1] + dy
-            if (x, y) in walls:
-                continue
-
-            heapq.heappush(queue, (cost + 1, (x, y), cheated))
-
-        if cheated == 0:
-            for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
-                x = pos[0] + dx
-                y = pos[1] + dy
-                if (x, y) not in walls:
+    # look for cheats
+    for (x, y) in tile_cost.keys():
+        for dy in range(-cheat, cheat + 1):
+            for dx in range(-cheat, cheat + 1):
+                cost = abs(dx) + abs(dy)
+                if cost > cheat:
+                    continue
+                nx, ny = x + dx, y + dy
+                if (nx, ny) in walls or nx < 0 or ny < 0 or nx >= w or ny >= h:
                     continue
 
-                x += dx
-                y += dy
+                n = tile_cost[(nx, ny)]
+                c = tile_cost[(x, y)] + cost
 
-                if (x,y) in walls or x < 0 or y < 0 or x >= w or y >= h:
-                    continue
+                if n - c >= min_save:
+                    count += 1
 
-                heapq.heappush(queue, (cost + 2, (x, y), 1))
+    return count
 
-    return -1
-
-
-def main(input_file):
+def main(input_file, min_save=100):
     start = None
     end = None
     walls = set()
@@ -91,17 +63,13 @@ def main(input_file):
             elif ch == '#':
                 walls.add((x, y))
 
-
-    A = solve_optimal(start, end, walls)
-    B = 0
-
-    print(start)
-    print(end)
+    A = solve_optimal2(start, end, walls, min_save, 2)
+    B = solve_optimal2(start, end, walls, min_save, 20)
 
     print("A:", A)
     print("B:", B)
 
 
 if __name__ == "__main__":
-    # main("input.txt")
-    main("test.txt")
+    main("input.txt", 100)
+    # main("test.txt", 1)
