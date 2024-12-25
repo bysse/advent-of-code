@@ -1,3 +1,4 @@
+import os.path
 from collections import deque, defaultdict
 
 from std import *
@@ -38,30 +39,18 @@ def encode_number(prefix, value, bits_in, wires):
         wires[f"{prefix}{i:02}"] = bit
 
 
-def test_bit(bit_num, wires, gates, expected):
-    output_gate = f"z{bit_num:02}"
-    result = evaluate_gate(wires, gates, output_gate)
-    if result != expected:
-        print(f"Failed {output_gate} with value {result}")
-        # print(str_gates(output_gate, gates))
-
-
-def test_bits(a, b, mask, gates, outputs):
-    inputs = {}
-    encode_number("x", a, 44, inputs)
-    encode_number("y", b, 44, inputs)
-
-    result = evaluate_gates(inputs, gates, outputs)
-    return (result & mask) == ((a + b) & mask)
-
-
-def str_gates(wire, gates):
+def str_gates(wire, gates, exclude=None):
     if wire not in gates:
         return wire
+    if exclude and wire in exclude:
+        return f"{wire}..."
     a, op, b = gates[wire]
-    a = str_gates(a, gates)
-    b = str_gates(b, gates)
-    return f"({a} {op} {b})"
+    a = str_gates(a, gates, exclude)
+    b = str_gates(b, gates, exclude)
+    if len(b) > len(a):
+        return f"{wire}:({b} {op} {a})"
+
+    return f"{wire}:({a} {op} {b})"
 
 
 def build_gate_tree(outputs, gates):
@@ -86,6 +75,94 @@ def is_input(a):
     return a[0] == 'x' or a[0] == 'y'
 
 
+def execute(a, b, gates, outputs):
+    inputs = {}
+    encode_number("x", a, 44, inputs)
+    encode_number("y", b, 44, inputs)
+
+    return evaluate_gates(inputs, gates, outputs)
+
+
+def execute_for_bit(a, b, gates, outputs, n):
+    inputs = {}
+    encode_number("x", a, 44, inputs)
+    encode_number("y", b, 44, inputs)
+
+    ret = evaluate_gates(inputs, gates, outputs)
+    print(bin(ret >> n))
+    return inputs[f"z{n + 1:02}"], inputs[f"z{n:02}"]
+
+
+def test_combinations(value, bit, gates, outputs):
+    print("  (0+0) = ", end='')
+    ok = True
+    if (r := execute_for_bit(0, 0, gates, outputs, bit)) != (0, 0):
+        print("  error ->", r)
+        ok = False
+    print("  (1+0) = ", end='')
+    if (r := execute_for_bit(value, 0, gates, outputs, bit)) != (0, 1):
+        print("  error ->", r)
+        ok = False
+    print("  (0+1) = ", end='')
+    if (r := execute_for_bit(0, value, gates, outputs, bit)) != (0, 1):
+        print("  error ->", r)
+        ok = False
+
+    print("  (1+1) = ", end='')
+    if (r := execute_for_bit(value, value, gates, outputs, bit)) != (1, 0):
+        print("  error -> in carry", r)
+        ok = False
+    return ok
+
+
+def find_errors(gates, outputs, gate_tree):
+    valid_gates = set()
+    for bit in range(45):
+        node = f"z{bit:02}"
+        node_2 = f"z{bit + 1:02}"
+        print(f"Testing bit {bit}")
+        print("  ", str_gates(node, gates, valid_gates))
+        value = 1 << bit
+        mask = (value << 1) - 1
+
+        if not test_combinations(value, bit, gates, outputs):
+            print(f"Error at bit {bit}")
+            print("  ", str_gates(node, gates))
+            for gate in sorted(gate_tree[node]):
+                if is_input(gate) or gate in valid_gates:
+                    continue
+                print("  ", gate, " = ", " ".join(gates[gate]))
+
+            print(f"Error at bit {bit + 1}")
+            print("  ", str_gates(node_2, gates))
+            for gate in sorted(gate_tree[node_2]):
+                if is_input(gate) or gate in valid_gates:
+                    continue
+                print("  ", gate, " = ", " ".join(gates[gate]))
+            print("  ", node_2, " = ", " ".join(gates[node_2]))
+
+            print(bit - 1, ":", str_gates(f"z{bit - 1:02}", gates, valid_gates))
+            print(bit, ":", str_gates(node, gates, valid_gates))
+            print(bit + 1, ":", str_gates(node_2, gates, valid_gates))
+            return bit, gate_tree[node_2] - valid_gates
+        else:
+            valid_gates |= gate_tree[node]
+    return 0, set()
+
+
+def switch(x, a, b):
+    if x == a:
+        return b
+    if x == b:
+        return a
+    return x
+
+
+def get_output(output):
+    # return output
+    return switch(switch(switch(switch(switch(output, "z39", "mqh"), "z28", "tfb"), "bkr", "rnq"), 'hccX', 'kqpX'), "z08", "vvr")
+
+
 def main(input_file):
     inputs, rules = list(groups(input_file))
     wires = {}
@@ -99,7 +176,7 @@ def main(input_file):
     outputs = []
     for line in rules:
         part = line.split(" ")
-        output = part[-1]
+        output = get_output(part[-1])
         gates[output] = (part[0], part[1], part[2])
         parent_tree[part[0]].add(output)
         parent_tree[part[2]].add(output)
@@ -109,36 +186,36 @@ def main(input_file):
     gate_tree = build_gate_tree(outputs, gates)
 
     # print("A:", evaluate_gates(wires, gates, outputs))
+    find_errors(gates, outputs, gate_tree)
 
-    involved = set()
-    for node, (a, op, b) in gates.items():
-        if is_input(a) and is_input(b):
-            continue
-        involved.add(node)
-
-    print("digraph G {")
-    for output, (a, op, b) in gates.items():
-        print(f"{output} [label=\"{op}\", xlabel=\"{output}\"]")
-        print(f"{output} -> {a}")
-        print(f"{output} -> {b}")
-    print("}")
+    dig(gates, outputs, gate_tree)
 
 
-def alternate(mask, gates, outputs, potential, max_faulty):
-    # TODO: vary all potential gates and check if the result is correct
-    potential = set([x for x in potential if x[0] != 'x' and x[0] != 'y'])
-
-    queue = deque()
-    for i in potential:
-        queue.append((i, potential - {i}))
-
-    return max_faulty
+    swaps = sorted(["z39", "mqh", "z28", "tfb", "bkr", "rnq", "z08", "vvr"])
+    print(",".join(swaps))
 
 
-def is_correct(mask, gates, outputs):
-    odd = 0x5555555
-    even = 0xaaaaaaa
-    return test_bits(odd, odd, mask, gates, outputs) and test_bits(even, even, mask, gates, outputs)
+def dig(gates, outputs, gate_tree):
+    prune = set()
+    #for i in range(20):
+    #    prune.add(f"z{i:02}")
+    #    outputs.remove(f"z{i:02}")
+    #    prune |= gate_tree[f"z{i:02}"]
+
+    with open("graph.dot", "w") as f:
+        f.write("digraph G {\n")
+        for output, (a, op, b) in gates.items():
+            if output in prune:
+                continue
+            f.write(f"{output} [label=\"{op}\", xlabel=\"{output}\"]\n")
+            f.write(f"{output} -> {a}\n")
+            f.write(f"{output} -> {b}\n")
+
+        f.write("subgraph {\n")
+        f.write("rank=same;\n")
+        f.write(";".join(outputs))
+        f.write("}\n")
+        f.write("}\n")
 
 
 if __name__ == "__main__":
