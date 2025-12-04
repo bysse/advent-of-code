@@ -146,7 +146,7 @@ def tdlr_2d(x, y, width, height, include_center=False):
         yield x, y
 
 
-def adjacent_2d(x, y, width, height, include_center=False):
+def adjacent_2d_bound(x, y, width, height, include_center=False):
     """ Iterator for all adjacent coordinates within the specified rect"""
     for dy in range(-1, 2):
         if y + dy < 0 or y + dy >= height:
@@ -157,6 +157,19 @@ def adjacent_2d(x, y, width, height, include_center=False):
             if x + dx < 0 or x + dx >= width:
                 continue
             yield x + dx, y + dy
+
+def adjacent_2d(x, y, exclude_center=True):
+    """ Iterator for all adjacent coordinates in 2D"""
+    yield x - 1, y - 1
+    yield x + 0, y - 1
+    yield x + 1, y - 1
+    yield x - 1, y + 0
+    if not exclude_center:
+        yield x + 0, y + 0
+    yield x + 1, y + 0
+    yield x - 1, y + 1
+    yield x + 0, y + 1
+    yield x + 1, y + 1
 
 
 def adjacent_3d(x, y, z):
