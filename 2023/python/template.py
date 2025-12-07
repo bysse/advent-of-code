@@ -8,19 +8,27 @@ DAY = extract(os.path.basename(__file__), r"(\d+)")[0]
 INPUT = f"../input/input{DAY}.txt"
 INPUT = f"../input/test{DAY}.txt"
 
-data = []
-for line in lines(INPUT):
-    data.append(ints(line))
 
-data = {}
-for y, line in enumerate(lines(INPUT)):
-    for x, ch in enumerate(line):
-        data[(x, y)] = ch
+def parse_input(input_file):
+    data = []
+    for line in lines(INPUT):
+        data.append(ints(line))
 
-summary(INPUT)
+    data = {}
+    for y, line in enumerate(lines(INPUT)):
+        for x, ch in enumerate(line):
+            data[(x, y)] = ch
+    return data
 
-A = 0
-B = 0
 
-print("A:", A)
-print("B:", B)
+def part_a(data):
+    return 0
+
+
+def part_b(data):
+    return 0
+
+
+data = parse_input(INPUT)
+print("A:", part_a(data))
+print("B:", part_b(data))
