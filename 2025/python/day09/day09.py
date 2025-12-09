@@ -195,7 +195,7 @@ def main(input_file):
 
 
 if __name__ == "__main__":
-    #main("input.txt")
+    main("input.txt")
     main("test.txt")
 
 # 4586842110 too high

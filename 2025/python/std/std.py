@@ -359,7 +359,7 @@ class IVec2:
         self.y = y
 
     def __repr__(self):
-        return f"IVec2({self.x},{self.y})"
+        return f"({self.x},{self.y})"
 
     def __eq__(self, other):
         if type(self) is type(other):
@@ -395,10 +395,13 @@ class IVec2:
         return self.__mul__(other)
 
     def __abs__(self):  # taxi
-        return abs(self.x) + abs(self.y)
+        return IVec2(abs(self.x), abs(self.y))
 
     def __hash__(self):
         return hash((self.x, self.y))
+
+    def taxi(self):
+        return abs(self.x) + abs(self.y)
 
 
 class Vec3:
