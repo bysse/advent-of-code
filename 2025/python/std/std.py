@@ -1,3 +1,4 @@
+import math
 import os
 import re
 from functools import reduce
@@ -157,6 +158,7 @@ def adjacent_2d_bound(x, y, width, height, include_center=False):
             if x + dx < 0 or x + dx >= width:
                 continue
             yield x + dx, y + dy
+
 
 def adjacent_2d(x, y, exclude_center=True):
     """ Iterator for all adjacent coordinates in 2D"""
@@ -403,6 +405,11 @@ class IVec2:
     def taxi(self):
         return abs(self.x) + abs(self.y)
 
+    def length(self):
+        return math.sqrt(self.x * self.x + self.y * self.y)
+
+    def length2(self):
+        return self.x * self.x + self.y * self.y
 
 class Vec3:
     x: float
@@ -537,7 +544,6 @@ class Interval:
 
     def __repr__(self):
         return f"Interval({self.x0},{self.x1})"
-
 
 # print(Interval(0, 100).cut_out(Interval(150, 250)))
 # print(Interval(0, 100).cut_out(Interval(-50, 150)))
