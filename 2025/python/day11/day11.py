@@ -2,19 +2,15 @@ import heapq
 from collections import defaultdict
 
 from std import *
-import copy
-import re
-import functools
-import itertools
 
 
-def find_solutions(nodes, start, goal):
-    explore = [start]
+def find_solutions(nodes):
+    explore = ['you']
     count = 0
     while explore:
         node = heapq.heappop(explore)
 
-        if node == goal:
+        if node == 'out':
             count += 1
             continue
 
@@ -23,15 +19,22 @@ def find_solutions(nodes, start, goal):
     return count
 
 
-def find_solutions_b(nodes, start, goal):
-    state_map = defaultdict(int)
+def find_solutions_b(nodes):
+    memory = defaultdict(int)
 
-    for _ in range(5):
-        for node, found, state_map in state_map:
+    def explore(node, dac, fft):
+        if node == 'out':
+            return 1 if (dac and fft) else 0
+        key = node, dac, fft
+        if key in memory:
+            return memory[key]
+        total = 0
+        for child in nodes[node]:
+            total += explore(child, dac or node == 'dac', fft or node == 'fft')
+        memory[key] = total
+        return total
 
-
-
-    return state_map
+    return explore('svr', False, False)
 
 
 def main(input_file):
@@ -40,14 +43,9 @@ def main(input_file):
         parts = [x.rstrip(':') for x in line.split(' ')]
         nodes[parts[0]] = parts[1:]
 
-    A = 0
-    B = 0
-
-    A += find_solutions(nodes, 'you', 'out')
+    A = find_solutions(nodes)
     print("A:", A)
-
-    B += find_solutions_b(nodes, 'out', 'svr')
-
+    B = find_solutions_b(nodes)
     print("B:", B)
 
 
