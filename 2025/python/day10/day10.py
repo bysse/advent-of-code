@@ -109,7 +109,6 @@ def search_c(goal, buttons):
 
     queue = [(0, start)]
     for focus in button_order:
-        print(" focus =", focus, ">", len(queue))
         states = find_solution(goal, queue, button_per_index[focus], focus)
         for cost, state in states:
             if state == goal:
@@ -197,7 +196,7 @@ def main(input_file):
     print("A:", A)
 
     for graph in data:
-        cost = search_d(graph[2], graph[1])
+        cost = search_c(graph[2], graph[1])
         print(" =", cost)
         B += cost
 
