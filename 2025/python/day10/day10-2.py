@@ -39,34 +39,39 @@ def has_negative(joltage):
 def search_df(state_dictionary:Dict[Tuple[bool,...],Tuple[Tuple[int,...], int]], buttons, target):
     @functools.cache
     def iterate(joltage: Tuple[int,...]):
-        if has_negative(joltage):
-            return -1
 
         if sum(joltage) == 0:
             return 0
 
-        if is_all_even(joltage):
-            x = iterate(tuple([x // 2 for x in joltage]))
-            if x >= 0:
-                return 2 * x
-
+        lowest = -1
         parity = tuple([not is_even(x) for x in joltage])
-        if parity in state_dictionary:
-            lowest = 1e10
-            for press, cost in state_dictionary[parity]:
-                x = iterate(tuple([x[0] - x[1] for x in zip(joltage, press)]))
-                if x < 0:
-                    continue
-                lowest = min(lowest, x + cost)
-            return -1 if lowest == 1e10 else lowest
+        if parity not in state_dictionary:
+            return -1
 
-        return -1
+        for press, cost in state_dictionary[parity]:
+            next_state = tuple([x[0] - x[1] for x in zip(joltage, press)])
+            if has_negative(next_state):
+                continue
+
+            if not is_all_even(next_state):
+                raise Exception("ERROR")
+
+            x = iterate(tuple([x // 2 for x in next_state]))
+            if x < 0:
+                continue
+            if lowest < 0:
+                lowest = cost + 2 * x
+            else:
+                lowest = min(cost + 2 * x, lowest)
+
+        return lowest
+
 
     return iterate(tuple(target))
 
 
 # https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/
-
+# https://aoc.winslowjosiah.com/solutions/2025/day/10/
 
 def main(input_file):
     data = []
@@ -103,5 +108,5 @@ def main(input_file):
 
 
 if __name__ == "__main__":
-    main("input2.txt")
+    main("input.txt")
     #main("test.txt")
