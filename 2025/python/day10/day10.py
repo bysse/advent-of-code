@@ -205,5 +205,5 @@ def main(input_file):
 
 
 if __name__ == "__main__":
-    # main("input.txt")
-    main("test.txt")
+    main("input.txt")
+    #main("test.txt")

@@ -96,7 +96,9 @@ def main(input_file):
     print("A:", A)
 
     for graph in data:
-        B += solve_equation_system(graph[-1], graph[1])
+        c = solve_equation_system(graph[-1], graph[1])
+        print(c)
+        B += c
 
     print("B:", B)
 
